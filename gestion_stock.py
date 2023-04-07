@@ -1,6 +1,9 @@
 from tkinter import *
 import mysql.connector
 from tkinter.messagebox import *
+import pandas as pd
+
+
 
 conn = mysql.connector.connect(
     host="localhost",
@@ -108,6 +111,19 @@ class PageBoutique():
         JeuxSoButton = Button(self.frame, text="JeuxSo",font=("Arial",20),width=8, background="Blue",fg="black",command=self._pageJeuxSoUpd)
         JeuxSoButton.grid(column=3,row=7)
         
+        titreNomCSV  = Label(self.frame, text="CSV :",font=("Arial",20),fg="black",background="white")
+        titreNomCSV.grid(column=0,row=8)
+        
+        LivreButton = Button(self.frame, text="Livre",font=("Arial",20),width=8, background="Blue",fg="black",command=lambda:self._writeCsv(1))
+        LivreButton.grid(column=0,row=9)
+        JouetsButton = Button(self.frame, text="Jouets",font=("Arial",20),width=8, background="Blue",fg="black",command=lambda:self._writeCsv(2))
+        JouetsButton.grid(column=1,row=9)
+        ElectroButton = Button(self.frame, text="Electro-M",font=("Arial",20),width=8, background="Blue",fg="black",command=lambda:self._writeCsv(3))
+        ElectroButton.grid(column=2,row=9)
+        JeuxSoButton = Button(self.frame, text="JeuxSo",font=("Arial",20),width=8, background="Blue",fg="black",command=lambda:self._writeCsv(4))
+        JeuxSoButton.grid(column=3,row=9)
+        RuptureButton = Button(self.frame, text="Rupture_Stock",font=("Arial",20),width=12, background="Blue",fg="black",command=lambda:self._writeCsvRupture())
+        RuptureButton.grid(column=4,row=9)
         
     def _pageLivre(self):  #La page affichage : Livre
         for i in self.fenetre.winfo_children():
@@ -522,7 +538,25 @@ class PageBoutique():
         EntryButton= Button(self.frame, text="Modifier",font=("Arial",20),width=8, background="Blue",fg="black",command=lambda:[self.upd(menu1.get(),menu2.get(),ValueEntry.get()),self._accueil()])
         EntryButton.grid(column=0,row=3)  
 
-
+    def _writeCsv(self,id):
+        result = pd.read_sql_query(f"""
+                                   select * from boutique.produit where id_category = {id}
+                                   """,conn)
+                                   
+            
+        dataframe = pd.DataFrame(result)
+        dataframe.to_csv(r"stock.csv",index=False)
+        
+    def _writeCsvRupture(self):
+        result = pd.read_sql_query(f"""
+                                   select * from boutique.produit where quantite <= 0
+                                   """,conn)
+                                   
+            
+        dataframe = pd.DataFrame(result)
+        dataframe.to_csv(r"stock.csv",index=False)
+        
+        
     def supr(self,entry):
         #Petite partie pour trouver l'id (d'une taille indeterminée)
         try:
